@@ -1,3 +1,11 @@
+# 1/ transfer id parameter
+# 2/ hide connections
+# 3/ where do we specify environment 
+# - during project creation
+# - in vscode corner
+# 4/ tbc W approach: no import 
+# 5/ contact smn in D
+
 import logging
 import azure.functions as func
 import pandas as pd
