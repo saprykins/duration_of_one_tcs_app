@@ -1,0 +1,69 @@
+{
+  "subscriptionId": "7a83d78e-5e03-405c-9be4-191cf70830b5",
+  "notificationId": 8,
+  "id": "ffacb7e1-21c1-4cf5-862d-eb0b8e7c81df",
+  "eventType": "workitem.created",
+  "publisherId": "tfs",
+  "message": null,
+  "detailedMessage": null,
+  "resource": {
+    "id": 291923,
+    "rev": 1,
+    "fields": {
+      "System.AreaPath": "ATLAS - AWS Migration - TCS",
+      "System.TeamProject": "ATLAS - AWS Migration - TCS",
+      "System.IterationPath": "ATLAS - AWS Migration - TCS",
+      "System.WorkItemType": "Calculate duration",
+      "System.State": "New",
+      "System.Reason": "Moved to state New",
+      "System.CreatedDate": "2023-07-24T14:55:53.69Z",
+      "System.CreatedBy": "Svyatoslav SAPRYKIN <B449OH@login.axa>",
+      "System.ChangedDate": "2023-07-24T14:55:53.69Z",
+      "System.ChangedBy": "Svyatoslav SAPRYKIN <B449OH@login.axa>",
+      "System.CommentCount": 0,
+      "System.Title": "test5",
+      "Microsoft.VSTS.Common.StateChangeDate": "2023-07-24T14:55:53.69Z",
+      "Custom.app_id": 123123.0
+    },
+    "_links": {
+      "self": {
+        "href": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_apis/wit/workItems/291923"
+      },
+      "workItemUpdates": {
+        "href": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_apis/wit/workItems/291923/updates"
+      },
+      "workItemRevisions": {
+        "href": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_apis/wit/workItems/291923/revisions"
+      },
+      "workItemComments": {
+        "href": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_apis/wit/workItems/291923/comments"
+      },
+      "html": {
+        "href": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_workitems/edit/291923"
+      },
+      "workItemType": {
+        "href": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_apis/wit/workItemTypes/Calculate%20duration"
+      },
+      "fields": {
+        "href": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_apis/wit/fields"
+      }
+    },
+    "url": "https://dev.azure.com/go-gl-pr-migfactory-axa365/2580e63f-ea45-4f46-a581-b89714aa449f/_apis/wit/workItems/291923"
+  },
+  "resourceVersion": "1.0",
+  "resourceContainers": {
+    "collection": {
+      "id": "197f551a-b3a2-4208-86ca-87bd52e41b60",
+      "baseUrl": "https://dev.azure.com/go-gl-pr-migfactory-axa365/"
+    },
+    "account": {
+      "id": "f56d8595-bea0-4c2d-9ba5-cb0c547d5cd6",
+      "baseUrl": "https://dev.azure.com/go-gl-pr-migfactory-axa365/"
+    },
+    "project": {
+      "id": "2580e63f-ea45-4f46-a581-b89714aa449f",
+      "baseUrl": "https://dev.azure.com/go-gl-pr-migfactory-axa365/"
+    }
+  },
+  "createdDate": "2023-07-24T14:56:00.0296491Z"
+}
