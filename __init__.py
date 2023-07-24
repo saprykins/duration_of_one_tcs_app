@@ -32,7 +32,6 @@ container_name = "strcontainertcsduration"
 
 authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
-file_name = 'tcs_duration_3.csv'
 cols_duration =  [
     # updates needed
     "App id", 
@@ -250,7 +249,6 @@ def get_list_of_migrated_apps():
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    start_time = time.time()/60 # sec
     logging.info('Python HTTP trigger function processed a request.')
 
     name = req.params.get('name')
@@ -263,9 +261,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             name = req_body.get('name')
 
     if name:
+        file_name = 'tcs_duration_app_id_' + name + '.csv'
         df_duration = pd.DataFrame([], columns = cols_duration)
 
-        app_id = 248102
+        app_id = name # 248102
         df_duration = save_duration_to_df(app_id, df_duration)
 
         
@@ -282,9 +281,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             container_client.upload_blob(name=blob_name, data=data, overwrite=True)
 
         container_client.close()
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
+        return func.HttpResponse(f"File with duration for application_id {name} was generated successfully.")
     else:
         return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
+             "This HTTP triggered function executed successfully. Pass a 'application id' such as '248102' in the query string or in the request body.",
              status_code=200
         )
