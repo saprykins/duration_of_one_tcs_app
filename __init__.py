@@ -1,3 +1,5 @@
+# 0/ access to calls
+# in azure - allow calls from externals
 # 1/ transfer id parameter
 # 2/ hide connections
 # 3/ where do we specify environment 
