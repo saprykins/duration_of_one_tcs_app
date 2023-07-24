@@ -277,7 +277,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         blob_name = file_name
 
         with open(file_name, "rb") as data:
-            container_client.upload_blob(name=blob_name, data=data)
+            container_client.upload_blob(name=blob_name, data=data, overwrite=True)
 
         container_client.close()
         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
