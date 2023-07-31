@@ -48,6 +48,11 @@ cols_duration =  [
 ]
 
 
+
+
+
+
+
 def get_childs_list(app_id):
     #
     # Can be used to get all types of childs (user stories, features ...)
@@ -80,7 +85,7 @@ def get_childs_list(app_id):
 
 def get_duration(workitem_id):
     #
-    # 
+    # duration for tasks only
     #
 
     url = 'https://dev.azure.com/' + ORGANIZATION_NAME + '/' + PROJECT_NAME + '/_apis/wit/workItems/' + str(workitem_id) + '/updates?api-version=7.0'
@@ -220,57 +225,98 @@ def save_duration_to_df(app_id, df_duration):
 
 
 
-def get_list_of_migrated_apps():
-    #
-    #
-    #
-    list_of_apps = []
-    # url = 'https://dev.azure.com/' + ORGANIZATION_NAME + '/' + PROJECT_NAME + '/_apis/wit/workItems/' + str(workitem_id) + '/updates?api-version=7.0'
+def update_workitem_description(new_description, workitem_id):
+    # 
+    # to save to workitem data received after fnc terminated
+    # can be link to bucket
+    # 
+    url = f"https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/{workitem_id}?api-version=7.0"
 
-
-    # good query (not yet to start, changed during the last 7 days)
-    url = "https://dev.azure.com/" + ORGANIZATION_NAME + "/" + PROJECT_NAME + "/_apis/wit/wiql/00571464-1724-47f6-9e0d-57d4a38a7758"
-
-    # for tests
-    url = "https://dev.azure.com/" + ORGANIZATION_NAME + "/" + PROJECT_NAME + "/_apis/wit/wiql/cf2b3520-cd93-433d-8c45-46ab4c4c9ada"
     headers = {
-        'Accept': 'application/json',
-        'Authorization': 'Basic '+ authorization
+        "Content-Type": "application/json-patch+json"
     }
-    response = requests.get(
-        url = url,
+
+    body = [
+        {
+            "op": "add",
+            "path": "/fields/System.Description",
+            "value": new_description
+        }
+    ]
+
+    r = requests.patch(
+        url,
+        data=json.dumps(body),
         headers=headers,
+        auth=("", pat),
     )
-    apps_raw_data = response.json()["workItems"]
-    for app in apps_raw_data:
-        list_of_apps.append(app["id"])
-    return list_of_apps
+    print(r)
+
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
+    # parent_id_int = ''
+    try:
+        # Get the payload from the request body
+        payload = req.get_json()
 
-    name = req.params.get('name')
-    if not name:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            name = req_body.get('name')
+        # Extract the "Custom.app_id" field value as a float
+        parent_id_float = payload['resource']['fields']['Custom.app_id'] # work item id, or where will upload data
+        # print(parent_id_float, ' is parent extracted from ADO')
+        # Convert the float value to an integer
+        
+        parent_id_int = int(parent_id_float)
+        # print(parent_id_float, ' is parent int extracted from ADO')
+        
+        parent_id_int = str(parent_id_int)
+        # print(parent_id_float, ' is parent str extracted from ADO')
+        
+        # data = json.loads(json_data)
+        #
+        #
+        #
+        wi_id_float = payload['resource']['id']
+        wi_id_int = int(wi_id_float)
+        #
+        #
+        #
+        # Extract the value "248102" using the "System.Parent" key from the last item in the "value" array
+        # parent_id_undefined = data["value"][-1]["fields"]["System.Parent"]["newValue"] # parent id or application
+        # parent_id_int = int(parent_id_undefined)
+        # parent_id_int = '248102' # template app
+        # print(parent_id_int, ' is parent assigned in code')
+        
 
-    if name:
-        file_name = 'tcs_duration_app_id_' + name + '.csv'
+    except Exception as e:
+        return func.HttpResponse(f"Error processing the webhook payload: {str(e)}", status_code=500)
+    
+    if parent_id_int:
+        file_name = 'tcs_duration_app_id_' + parent_id_int + '.csv'
         df_duration = pd.DataFrame([], columns = cols_duration)
+        # 
+        # 
+        #
+        # parent_id_int = "248102" # OK
+        # parent_id_int = 248102 # OK
+        #
+        #
+        #
+        df_duration = save_duration_to_df(parent_id_int, df_duration)
 
-        app_id = name # 248102
-        df_duration = save_duration_to_df(app_id, df_duration)
-
+        # description_value = df_duration.to_string(index=False)
+        # description_value = df_duration.to_json(orient='records')
+        # description_value = df_duration.to_dict(orient='records')
         
         df_duration.to_csv(file_name, index=False)
 
         # Send the CSV file to Azure Blob Storage
+        # workitem_id = 291451 # WI to update description to
+        # new_description = "This is the updated description for the work item. 2"
+        # wi_id_int = '291451' # calculate obj
+
         
+
         blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
         container_client = blob_service_client.get_container_client(container_name)
@@ -278,9 +324,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         with open(file_name, "rb") as data:
             container_client.upload_blob(name=blob_name, data=data, overwrite=True)
-
+        
+        # URL
+        download_url = container_client.url
+        
         container_client.close()
-        return func.HttpResponse(f"File with duration for application_id {name} was generated successfully.")
+
+        # new_description = df_duration
+        new_description = download_url
+        # new_description = df_duration.to_string(index=False)
+        update_workitem_description(new_description, wi_id_int)
+        
+        
+        return func.HttpResponse(f"Duration for application_id {parent_id_int} was generated successfully.")
     else:
         return func.HttpResponse(
              "This HTTP triggered function executed successfully. Pass a 'application id' such as '248102' in the query string or in the request body.",
