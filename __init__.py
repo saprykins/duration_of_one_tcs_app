@@ -50,9 +50,6 @@ cols_duration =  [
 
 
 
-
-
-
 def get_childs_list(app_id):
     #
     # Can be used to get all types of childs (user stories, features ...)
@@ -184,8 +181,6 @@ def get_app_title(workitem_id):
     # 
     #
     url = 'https://dev.azure.com/' + ORGANIZATION_NAME + '/_apis/wit/workItems/' + str(workitem_id) + '?$expand=all'
-    # print(url)
-    # url = 'https://dev.azure.com/' + ORGANIZATION_NAME + '/' + PROJECT_NAME + '/_apis/wit/workItems/' + str(workitem_id) + '/updates?api-version=7.0'
 
     headers = {
         'Accept': 'application/json',
@@ -254,39 +249,42 @@ def update_workitem_description(new_description, workitem_id):
 
 
 
+def create_attachment(filename, content):
+    #
+    # Upload CSV file content as an attachment
+    #
+    url = f"https://dev.azure.com/{ORGANIZATION_NAME}/{PROJECT_NAME}/_apis/wit/attachments?fileName={filename}&uploadType=simple&api-version=7.1-preview"
+
+    headers = {
+        "Content-Type": "application/octet-stream",
+        "Authorization": f"Basic {authorization}"
+    }
+
+    r = requests.post(
+        url,
+        data=content,
+        headers=headers
+    )
+
+    return r
+
+
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
-    # parent_id_int = ''
+
     try:
         # Get the payload from the request body
         payload = req.get_json()
 
         # Extract the "Custom.app_id" field value as a float
-        parent_id_float = payload['resource']['fields']['Custom.app_id'] # work item id, or where will upload data
-        # print(parent_id_float, ' is parent extracted from ADO')
-        # Convert the float value to an integer
-        
+        parent_id_float = payload['resource']['fields']['Custom.app_id'] # work item id, or where will upload data        
         parent_id_int = int(parent_id_float)
-        # print(parent_id_float, ' is parent int extracted from ADO')
-        
         parent_id_int = str(parent_id_int)
-        # print(parent_id_float, ' is parent str extracted from ADO')
-        
-        # data = json.loads(json_data)
-        #
-        #
-        #
+
+        # Get wi id (where description will be updated)
         wi_id_float = payload['resource']['id']
         wi_id_int = int(wi_id_float)
-        #
-        #
-        #
-        # Extract the value "248102" using the "System.Parent" key from the last item in the "value" array
-        # parent_id_undefined = data["value"][-1]["fields"]["System.Parent"]["newValue"] # parent id or application
-        # parent_id_int = int(parent_id_undefined)
-        # parent_id_int = '248102' # template app
-        # print(parent_id_int, ' is parent assigned in code')
-        
 
     except Exception as e:
         return func.HttpResponse(f"Error processing the webhook payload: {str(e)}", status_code=500)
@@ -294,29 +292,57 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     if parent_id_int:
         file_name = 'tcs_duration_app_id_' + parent_id_int + '.csv'
         df_duration = pd.DataFrame([], columns = cols_duration)
-        # 
-        # 
-        #
-        # parent_id_int = "248102" # OK
-        # parent_id_int = 248102 # OK
-        #
-        #
-        #
         df_duration = save_duration_to_df(parent_id_int, df_duration)
-
-        # description_value = df_duration.to_string(index=False)
-        # description_value = df_duration.to_json(orient='records')
-        # description_value = df_duration.to_dict(orient='records')
-        
         df_duration.to_csv(file_name, index=False)
+        
+        # Read the CSV file content
+        with open(file_name, "rb") as file:
+            csv_content = file.read()
+
+        # Upload CSV file content as an attachment
+        attachment_response = create_attachment(file_name, csv_content)
+        
+        
+        # Get the attachment URL from the "Location" header in the response
+        attachment_url = attachment_response.json()["url"]
+
+
+        # Attach the file to the work item
+        url = f"https://dev.azure.com/{ORGANIZATION_NAME}/{PROJECT_NAME}/_apis/wit/workitems/{wi_id_int}?api-version=7.1-preview"
+        
+        
+        headers = {
+            "Content-Type": "application/json-patch+json",
+            "Authorization": f"Basic {authorization}"
+        }
+
+        # Update the JSON payload with the correct attachment URL
+        body = [
+            {
+                "op": "add",
+                "path": "/relations/-",
+                "value": {
+                    "rel": "AttachedFile",
+                    "url": attachment_url,
+                    "attributes": {
+                        "comment": "CSV file attachment"
+                    }
+                }
+            }
+        ]
+
+        r = requests.patch(
+            url,
+            json=body,  # Use "json" parameter to send JSON payload
+            headers=headers
+        )
+
+        print(r)
+
+
+
 
         # Send the CSV file to Azure Blob Storage
-        # workitem_id = 291451 # WI to update description to
-        # new_description = "This is the updated description for the work item. 2"
-        # wi_id_int = '291451' # calculate obj
-
-        
-
         blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
         container_client = blob_service_client.get_container_client(container_name)
@@ -332,7 +358,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # new_description = df_duration
         new_description = download_url
-        # new_description = df_duration.to_string(index=False)
         update_workitem_description(new_description, wi_id_int)
         
         
