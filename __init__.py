@@ -28,7 +28,7 @@ pat = "r*"
 # blob
 connect_str = "D*"
 
-container_name = "strcontainertcsduration"
+# container_name = "strcontainertcsduration"
 
 authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
@@ -213,7 +213,6 @@ def save_duration_to_df(app_id, df_duration):
         # duration, task_title, start_time, end_time = get_duration(task_id)
         duration, task_title, task_description, start_time, end_time = get_duration(task_id)
         new_row = [app_id, app_title, task_id, task_title, task_description, start_time, end_time, duration]
-        # new_row = [app_id, app_title, feature_id, feature_title, user_story_id, user_story_title, task_id, task_title, start_time, end_time, duration]
         new_df = pd.DataFrame([new_row], columns=cols_duration)
         df_duration = pd.concat([df_duration, new_df], ignore_index = True)
 
@@ -226,7 +225,7 @@ def update_workitem_description(new_description, workitem_id):
     # to save to workitem data received after fnc terminated
     # can be link to bucket
     # 
-    url = f"https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/{workitem_id}?api-version=7.0"
+    url = f"https://dev.azure.com/{ORGANIZATION_NAME}/{PROJECT_NAME}/_apis/wit/workitems/{workitem_id}?api-version=7.0"
 
     headers = {
         "Content-Type": "application/json-patch+json"
@@ -237,6 +236,11 @@ def update_workitem_description(new_description, workitem_id):
             "op": "add",
             "path": "/fields/System.Description",
             "value": new_description
+        },
+        {
+            "op": "add",
+            "path": "/fields/System.State",
+            "value": "Closed"
         }
     ]
 
@@ -342,7 +346,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
 
-
+        '''
         # Send the CSV file to Azure Blob Storage
         blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
@@ -356,15 +360,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         download_url = container_client.url
         
         container_client.close()
-
-        # new_description = df_duration
-        new_description = download_url
+        '''
+        new_description = "Check the attachment"
         update_workitem_description(new_description, wi_id_int)
+        
         
         
         return func.HttpResponse(f"Duration for application_id {parent_id_int} was generated successfully.")
     else:
         return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a 'application id' such as '248102' in the query string or in the request body.",
+             "This HTTP triggered function executed successfully. Pass a 'application id' such as '248102' in the field app_id",
              status_code=200
         )
