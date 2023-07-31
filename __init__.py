@@ -7,6 +7,7 @@
 # 4/ tbc W approach: no import 
 # 5/ contact smn in D
 
+
 import logging
 import azure.functions as func
 import pandas as pd
