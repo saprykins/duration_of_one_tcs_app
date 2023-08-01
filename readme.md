@@ -4,5 +4,7 @@ add to requirements.txt
 pip install -r requirements.txt  
 may be more steps here: https://stackoverflow.com/questions/75942313/azure-functions-with-vs-code-and-python-modulenotfounderror-no-module-named-a  
 
-```python -m venv .venv```
-```source .venv/bin/activate```
+
+python -m venv .venv  
+
+source .venv/bin/activate  
