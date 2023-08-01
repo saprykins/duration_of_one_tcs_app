@@ -28,7 +28,7 @@ pat = "r*"
 # blob
 connect_str = "D*"
 
-# container_name = "strcontainertcsduration"
+container_name = "strcontainertcsduration"
 
 authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
@@ -298,12 +298,55 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         file_name = 'tcs_duration_app_id_' + parent_id_int + '.csv'
         df_duration = pd.DataFrame([], columns = cols_duration)
         df_duration = save_duration_to_df(parent_id_int, df_duration)
-        df_duration.to_csv(file_name, index=False)
+        # df_duration.to_csv(file_name, index=False)
+
+        #
+        # 
+        # # trying to use bucket
+        #
+        #
+        csv_string = df_duration.to_csv(index=False)
+
+        # Get a reference to the blob and upload the CSV data
+        # blob_service_client = BlobServiceClient.from_connection_string(connection_string) # original line
+        blob_service_client = BlobServiceClient.from_connection_string(connect_str) # my line
+        blob_name = file_name
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+        blob_client.upload_blob(csv_string, overwrite=True)
+        
+        '''
+        # Send the CSV file to Azure Blob Storage
+        
+
+        container_client = blob_service_client.get_container_client(container_name)
+        blob_name = file_name
+
+        with open(file_name, "rb") as data:
+            container_client.upload_blob(name=blob_name, data=data, overwrite=True)
+        
+        # URL
+        download_url = container_client.url
+        
+        container_client.close()
+        '''
+        
+        
+        # 
+        # reading the file from blob
+        #
+        # blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        # blob_client = blob_service_client.get_blob_client(container=container_name, blob=file_name)
+        csv_content = blob_client.download_blob().readall()
+
+        # Encode the CSV content in base64 (required for attachment)
+        # csv_base64 = csv_content.encode("base64").decode()
         
         # Read the CSV file content
+        '''
         with open(file_name, "rb") as file:
             csv_content = file.read()
-
+        '''
+        
         # Upload CSV file content as an attachment
         attachment_response = create_attachment(file_name, csv_content)
         
@@ -346,21 +389,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
 
-        '''
-        # Send the CSV file to Azure Blob Storage
-        blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
-        container_client = blob_service_client.get_container_client(container_name)
-        blob_name = file_name
-
-        with open(file_name, "rb") as data:
-            container_client.upload_blob(name=blob_name, data=data, overwrite=True)
-        
-        # URL
-        download_url = container_client.url
-        
-        container_client.close()
-        '''
         new_description = "Check the attachment"
         update_workitem_description(new_description, wi_id_int)
         
