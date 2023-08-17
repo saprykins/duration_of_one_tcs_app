@@ -14,6 +14,7 @@ func init LocalFunctionProj --python
 cd LocalFunctionProj  
 
 func new --name HttpExample --template "HTTP trigger" --authlevel "anonymous"  
+func new --name HttpExample --template "HTTP trigger" --authlevel "function"  
 
 func start  
 
@@ -25,3 +26,4 @@ func azure functionapp publish <APP_NAME>
 
 link https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?pivots=python-mode-configuration&tabs=bash%2Cazure-cli  
 
+the key is in the url  
