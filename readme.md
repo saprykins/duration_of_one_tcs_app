@@ -31,4 +31,7 @@ the key is in the url
 
 use several python files https://www.youtube.com/watch?v=Fb5pO3-62Nc  
 
-create function in azure, then use cmd locally https://www.youtube.com/watch?v=pks_UUvhMkU&t=2059s  
+https://www.youtube.com/watch?v=pks_UUvhMkU&t=2059s  
+- create function in azure, then use cmd locally  
+- echange variables (in/out)  
+
