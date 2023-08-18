@@ -28,3 +28,6 @@ func azure functionapp publish <APP_NAME>
 link https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?pivots=python-mode-configuration&tabs=bash%2Cazure-cli  
 
 the key is in the url  
+
+use several python files https://www.youtube.com/watch?v=Fb5pO3-62Nc  
+
