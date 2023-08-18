@@ -15,6 +15,7 @@ cd LocalFunctionProj
 
 func new --name HttpExample --template "HTTP trigger" --authlevel "anonymous"  
 func new --name HttpExample --template "HTTP trigger" --authlevel "function"  
+func new --name TimerExample --template "Timer trigger" --schedule "0 * */5 * * *"  
 
 func start  
 
