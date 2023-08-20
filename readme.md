@@ -35,3 +35,5 @@ https://www.youtube.com/watch?v=pks_UUvhMkU&t=2059s
 - create function in azure, then use cmd locally  
 - echange variables (in/out)  
 
+need string configuration while running locally  
+no need --||-- while in cloudshell  
